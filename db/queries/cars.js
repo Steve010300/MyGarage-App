@@ -58,7 +58,7 @@ export async function deleteCar(id) {
 }
 
 export async function getCarsByMake(make) {
-  const sql = `SELECT * FROM cars WHERE make = $1`;
+  const sql = `SELECT * FROM cars WHERE LOWER(make) = LOWER($1)`;
   const { rows: cars } = await db.query(sql, [make]);
   return cars;
 }

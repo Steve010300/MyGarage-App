@@ -3,6 +3,9 @@ const app = express();
 export default app;
 
 import usersRouter from "#api/users";
+import carsRouter from "#api/cars";
+import favoritesRouter from "#api/favorites";
+import reviewsRouter from "#api/reviews";
 import getUserFromToken from "#middleware/getUserFromToken";
 import handlePostgresErrors from "#middleware/handlePostgresErrors";
 import cors from "cors";
@@ -20,6 +23,9 @@ app.use(getUserFromToken);
 app.get("/", (req, res) => res.send("Hello, World!"));
 
 app.use("/users", usersRouter);
+app.use("/cars", carsRouter);
+app.use("/favorites", favoritesRouter);
+app.use("/reviews", reviewsRouter);
 
 app.use(handlePostgresErrors);
 app.use((err, req, res, next) => {
