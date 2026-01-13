@@ -25,6 +25,24 @@ export async function getCarById(id) {
   return car;
 }
 
+export async function getCarWithOwnerById(id) {
+  const sql = `
+  SELECT DISTINCT ON (cars.id)
+    cars.*,
+    users.id AS owner_id,
+    users.username AS owner_username
+  FROM cars
+  LEFT JOIN my_cars ON my_cars.car_id = cars.id
+  LEFT JOIN users ON users.id = my_cars.user_id
+  WHERE cars.id = $1
+  ORDER BY cars.id, my_cars.id ASC
+  `;
+  const {
+    rows: [car],
+  } = await db.query(sql, [id]);
+  return car;
+}
+
 export async function getAllCars() {
   const sql = `SELECT * FROM cars`;
   const { rows: cars } = await db.query(sql);
@@ -81,6 +99,20 @@ export async function getCarsWithReviewStats() {
   GROUP BY cars.id
   `;
   const { rows: cars } = await db.query(sql);
+  return cars;
+}
+
+export async function getCarsByOwnerId(userId) {
+  const sql = `
+  SELECT cars.*, COALESCE(AVG(reviews.rating),0) AS avg_rating, COUNT(reviews.id) AS review_count
+  FROM my_cars
+  JOIN cars ON cars.id = my_cars.car_id
+  LEFT JOIN reviews ON reviews.car_id = cars.id
+  WHERE my_cars.user_id = $1
+  GROUP BY cars.id, my_cars.id
+  ORDER BY my_cars.id DESC
+  `;
+  const { rows: cars } = await db.query(sql, [userId]);
   return cars;
 }
 
