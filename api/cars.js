@@ -4,13 +4,15 @@ import getUserFromToken from "#middleware/getUserFromToken";
 import {
 	createCar,
 	createCarWithOwner,
-	getCarById,
+    getCarById,
+    getCarWithOwnerById,
 	getAllCars,
 	updateCar,
 	deleteCar,
 	getCarsByMake,
 	searchCars,
 	getCarsWithReviewStats,
+    getCarsByOwnerId,
 	getMyCars,
 } from "#db/queries/cars";
 import { getMyCars as checkMyCars } from "#db/queries/cars";
@@ -59,9 +61,21 @@ router.get("/make/:make", async (req, res) => {
     }
 });
 
+// Current user's uploaded cars
+router.get("/me", getUserFromToken, async (req, res) => {
+    try {
+        if (!req.user) return res.status(401).send("Authentication required.");
+        const cars = await getCarsByOwnerId(req.user.id);
+        res.send(cars);
+    } catch (error) {
+        console.error("Error fetching my cars:", error);
+        res.status(500).send("Internal server error");
+    }
+});
+
 router.get("/:id", async (req, res) => {
 	try {
-        const car = await getCarById(req.params.id);
+        const car = await getCarWithOwnerById(req.params.id);
 	    if (!car) return res.status(404).send("Car not found.");
 	    res.send(car);
     } catch (error) {
