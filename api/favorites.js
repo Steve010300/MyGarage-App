@@ -5,7 +5,7 @@ import {
 	addFavorite,
 	getFavorites,
 	getFavoritesByUserId,
-	removeFavorite,
+	removeFavoriteForUser,
 	isFavorite,
 	getFavoritesWithCars,
 } from "#db/queries/favorites";
@@ -43,10 +43,8 @@ router.get("/me", getUserFromToken, async (req, res) => {
 router.delete("/:id", getUserFromToken, async (req, res) => {
 	try {
         if (!req.user) return res.status(401).send("Authentication required.");
-	    // naive removal — removeFavorite returns the deleted row
-	    const deleted = await removeFavorite(req.params.id);
+	    const deleted = await removeFavoriteForUser(req.params.id, req.user.id);
 	    if (!deleted) return res.status(404).send("Favorite not found.");
-	    if (deleted.user_id !== req.user.id) return res.status(403).send("Not allowed.");
 	    res.send(deleted);
     } catch (error) {
         console.error("Error removing favorite:", error);

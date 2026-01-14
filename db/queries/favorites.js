@@ -48,6 +48,19 @@ export async function removeFavorite(id) {
   return favorite;
 }
 
+export async function removeFavoriteForUser(id, userId) {
+  const sql = `
+  DELETE
+  FROM favorites
+  WHERE id = $1 AND user_id = $2
+  RETURNING *
+  `;
+  const {
+    rows: [favorite],
+  } = await db.query(sql, [id, userId]);
+  return favorite;
+}
+
 export async function isFavorite(userId, carId) {
   const sql = `SELECT 1 FROM favorites WHERE user_id = $1 AND car_id = $2 LIMIT 1`;
   const { rowCount } = await db.query(sql, [userId, carId]);
